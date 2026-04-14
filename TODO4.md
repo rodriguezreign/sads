@@ -1,1 +1,0 @@
-# TODO: Clean up login page (Completed)\n\n- [x] Fixed indentation in login.blade.php auth-header h2\n- [x] Cleared views cache\n\nLogin page 'Lost and Found' header now properly formatted within design. Refresh page to see.
