@@ -1,3 +1,173 @@
+# Local Setup Guide
+
+This project is a Laravel 13 application with Vite/Tailwind frontend assets.
+
+## Features
+
+- User authentication (register, login, logout)
+- Password recovery and reset flow
+- Email verification workflow for account activation
+- Protected dashboard route for authenticated and verified users
+- User profile management (edit profile, update password, delete account)
+- Responsive frontend powered by Blade, Vite, and Tailwind CSS
+
+## Software and Programs Required
+
+Install these before running the project:
+
+- Git (for cloning and pulling updates)
+- PHP 8.3 or newer
+- Composer 2.x
+- Node.js 20+ (includes npm)
+- MySQL or MariaDB server (SQLite is also supported)
+- A web browser (Chrome, Edge, Firefox, etc.)
+
+## Recommended for Windows
+
+- Laragon (recommended all-in-one local environment for PHP, MySQL, and service management)
+- Visual Studio Code (recommended editor)
+- MySQL Workbench or phpMyAdmin (optional database GUI)
+
+## PHP Extensions
+
+Make sure common Laravel extensions are enabled:
+
+- BCMath
+- Ctype
+- Fileinfo
+- JSON
+- Mbstring
+- OpenSSL
+- PDO and pdo_mysql
+- Tokenizer
+- XML
+
+If you are using Laragon on Windows, start Laragon first so PHP and database services are available.
+
+## 1. Clone and Open Project
+
+Clone the repository, then open the project folder:
+
+- c:/laragon/www/sad-final
+
+## Get Latest Commits from development Branch
+
+If you are already on the development branch:
+
+	git checkout development
+	git pull origin development
+
+If you are on another branch and only want to update local tracking info:
+
+	git fetch origin development
+
+If you want to merge latest development into your current branch:
+
+	git fetch origin
+	git merge origin/development
+
+Optional (view latest commits on development):
+
+	git log origin/development --oneline -n 10
+
+## 2. Install Dependencies and Initial App Setup
+
+Run this in the project root:
+
+	composer run setup
+
+What this script does:
+
+- Installs PHP dependencies
+- Creates .env from .env.example (if missing)
+- Generates APP_KEY
+- Runs migrations
+- Installs Node dependencies
+- Builds frontend assets
+
+## 3. Configure Environment
+
+Open .env and set your database credentials.
+
+Example for MySQL:
+
+	DB_CONNECTION=mysql
+	DB_HOST=127.0.0.1
+	DB_PORT=3306
+	DB_DATABASE=sad_final
+	DB_USERNAME=root
+	DB_PASSWORD=
+
+If you changed DB settings after the first setup run, apply migrations again:
+
+	php artisan migrate
+
+## 4. Run in Development Mode
+
+Use the combined dev script:
+
+	composer run dev
+
+This starts:
+
+- Laravel app server
+- Queue listener
+- Vite dev server
+
+Default app URL:
+
+- http://127.0.0.1:8000
+
+To stop all services, press Ctrl+C.
+
+## Optional: Run Services Separately
+
+If you prefer separate terminals:
+
+Terminal 1:
+
+	php artisan serve
+
+Terminal 2:
+
+	npm run dev
+
+Terminal 3 (optional queue worker):
+
+	php artisan queue:listen --tries=1
+
+## Running Tests
+
+Run test suite:
+
+	composer run test
+
+Or:
+
+	php artisan test
+
+## Production Build of Assets
+
+To build frontend assets for production:
+
+	npm run build
+
+## Common Issues
+
+- APP_KEY missing: run php artisan key:generate
+- Storage permission issues: run php artisan storage:link
+- Config cache issues after .env changes:
+
+	  php artisan config:clear
+	  php artisan cache:clear
+
+## Quick Start (All-in-One)
+
+From a fresh clone:
+
+	composer run setup
+	composer run dev
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

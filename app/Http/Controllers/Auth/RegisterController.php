@@ -25,7 +25,7 @@ class RegisterController extends Controller
         \App\Models\User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
+            'password' => $validated['password'],
         ]);
 
         return redirect()->route('login')->with('success', 'Registration successful! Please login.');
