@@ -1,6 +1,6 @@
-# Local Setup Guide
+# SADS - Local Setup Guide
 
-This project is a Laravel 13 application with Vite/Tailwind frontend assets.
+This project is a Laravel 13 application with a Vite + Tailwind CSS frontend.
 
 ## Features
 
@@ -9,28 +9,36 @@ This project is a Laravel 13 application with Vite/Tailwind frontend assets.
 - Email verification workflow for account activation
 - Protected dashboard route for authenticated and verified users
 - User profile management (edit profile, update password, delete account)
+- Admin role support
+- Item management
 - Responsive frontend powered by Blade, Vite, and Tailwind CSS
 
-## Software and Programs Required
+## Prerequisites
 
-Install these before running the project:
+Install the following software before running the project.
 
-- Git (for cloning and pulling updates)
-- PHP 8.3 or newer
-- Composer 2.x
-- Node.js 20+ (includes npm)
-- MySQL or MariaDB server (SQLite is also supported)
-- A web browser (Chrome, Edge, Firefox, etc.)
+### Required
 
-## Recommended for Windows
+| Software             | Version   | Purpose                        | Download                                      |
+|----------------------|-----------|--------------------------------|-----------------------------------------------|
+| Git                  | latest    | Clone and manage source code   | https://git-scm.com/downloads                 |
+| PHP                  | >= 8.3    | Backend runtime                | https://www.php.net/downloads                  |
+| Composer             | >= 2.x    | PHP dependency manager         | https://getcomposer.org/download               |
+| Node.js (includes npm) | >= 20  | Frontend build tooling         | https://nodejs.org/                            |
+| MySQL or MariaDB     | latest    | Database server                | https://dev.mysql.com/downloads/               |
 
-- Laragon (recommended all-in-one local environment for PHP, MySQL, and service management)
-- Visual Studio Code (recommended editor)
-- MySQL Workbench or phpMyAdmin (optional database GUI)
+### Recommended (Windows)
 
-## PHP Extensions
+| Software             | Purpose                                              | Download                                 |
+|----------------------|------------------------------------------------------|------------------------------------------|
+| Laragon              | All-in-one local environment (PHP, MySQL, Apache)    | https://laragon.org/download             |
+| Visual Studio Code   | Code editor                                          | https://code.visualstudio.com/           |
 
-Make sure common Laravel extensions are enabled:
+> If you are using **Laragon**, start it first so that PHP and MySQL services are available in your terminal.
+
+### Required PHP Extensions
+
+Verify these are enabled in your `php.ini` (Laragon enables them by default):
 
 - BCMath
 - Ctype
@@ -38,192 +46,183 @@ Make sure common Laravel extensions are enabled:
 - JSON
 - Mbstring
 - OpenSSL
-- PDO and pdo_mysql
+- PDO + pdo_mysql
 - Tokenizer
 - XML
 
-If you are using Laragon on Windows, start Laragon first so PHP and database services are available.
+You can check enabled extensions by running:
 
-## 1. Clone and Open Project
+```bash
+php -m
+```
 
-Clone the repository, then open the project folder:
+## Dependencies
 
-- c:/laragon/www/sad-final
+### PHP Dependencies (via Composer)
 
-## Get Latest Commits from development Branch
+| Package                        | Version    | Type |
+|--------------------------------|------------|------|
+| laravel/framework              | ^13.0      | prod |
+| laravel/tinker                 | ^3.0       | prod |
+| fakerphp/faker                 | ^1.23      | dev  |
+| laravel/boost                  | *          | dev  |
+| laravel/pail                   | ^1.2.5     | dev  |
+| laravel/pint                   | ^1.27      | dev  |
+| mockery/mockery                | ^1.6       | dev  |
+| nunomaduro/collision           | ^8.6       | dev  |
+| pestphp/pest                   | ^4.5       | dev  |
+| pestphp/pest-plugin-laravel    | ^4.1       | dev  |
 
-If you are already on the development branch:
+### Node Dependencies (via npm)
 
-	git checkout development
-	git pull origin development
+| Package              | Version              | Type |
+|----------------------|----------------------|------|
+| tailwindcss          | ^4.0.0               | dev  |
+| @tailwindcss/vite    | ^4.0.0               | dev  |
+| vite                 | ^8.0.0               | dev  |
+| laravel-vite-plugin  | ^3.0.0               | dev  |
+| axios                | >=1.11.0 <=1.14.0   | dev  |
+| concurrently         | ^9.0.1               | dev  |
 
-If you are on another branch and only want to update local tracking info:
+## Installation
 
-	git fetch origin development
+### 1. Clone the Repository
 
-If you want to merge latest development into your current branch:
+```bash
+git clone <repository-url> sads
+cd sads
+```
 
-	git fetch origin
-	git merge origin/development
+### 2. One-Command Setup
 
-Optional (view latest commits on development):
+Run the setup script from the project root:
 
-	git log origin/development --oneline -n 10
+```bash
+composer run setup
+```
 
-## 2. Install Dependencies and Initial App Setup
+This single command will:
 
-Run this in the project root:
+1. Install all PHP dependencies (`composer install`)
+2. Copy `.env.example` to `.env` if `.env` does not exist
+3. Generate the `APP_KEY`
+4. Run database migrations
+5. Install all Node dependencies (`npm install`)
+6. Build frontend assets (`npm run build`)
 
-	composer run setup
+### 3. Configure the Database
 
-What this script does:
+Open the `.env` file and set your database credentials:
 
-- Installs PHP dependencies
-- Creates .env from .env.example (if missing)
-- Generates APP_KEY
-- Runs migrations
-- Installs Node dependencies
-- Builds frontend assets
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sads
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## 3. Configure Environment
+> Make sure the database `sads` exists on your MySQL server before running migrations. You can create it with:
+>
+> ```sql
+> CREATE DATABASE sads;
+> ```
 
-Open .env and set your database credentials.
+If you changed database settings after the initial setup, re-run migrations:
 
-Example for MySQL:
+```bash
+php artisan migrate
+```
 
-	DB_CONNECTION=mysql
-	DB_HOST=127.0.0.1
-	DB_PORT=3306
-	DB_DATABASE=sad_final
-	DB_USERNAME=root
-	DB_PASSWORD=
+### 4. Start the Development Server
 
-If you changed DB settings after the first setup run, apply migrations again:
+```bash
+composer run dev
+```
 
-	php artisan migrate
+This starts three services concurrently:
 
-## 4. Run in Development Mode
+| Service         | Command                            | Default URL              |
+|-----------------|------------------------------------|--------------------------|
+| Laravel server  | `php artisan serve`                | http://127.0.0.1:8000   |
+| Queue worker    | `php artisan queue:listen --tries=1` | —                      |
+| Vite dev server | `npm run dev`                      | handled by Vite HMR     |
 
-Use the combined dev script:
+Open http://127.0.0.1:8000 in your browser. Press `Ctrl+C` to stop all services.
 
-	composer run dev
+### Alternative: Run Services Separately
 
-This starts:
+If you prefer running each service in its own terminal:
 
-- Laravel app server
-- Queue listener
-- Vite dev server
+**Terminal 1** - Laravel server:
+```bash
+php artisan serve
+```
 
-Default app URL:
+**Terminal 2** - Vite dev server (hot reload):
+```bash
+npm run dev
+```
 
-- http://127.0.0.1:8000
+**Terminal 3** - Queue worker (optional, needed for queued jobs/emails):
+```bash
+php artisan queue:listen --tries=1
+```
 
-To stop all services, press Ctrl+C.
+## Staying Up to Date
 
-## Optional: Run Services Separately
+Pull the latest changes from the `dev` branch:
 
-If you prefer separate terminals:
+```bash
+git checkout dev
+git pull origin dev
+```
 
-Terminal 1:
+After pulling, install any new dependencies and run migrations:
 
-	php artisan serve
-
-Terminal 2:
-
-	npm run dev
-
-Terminal 3 (optional queue worker):
-
-	php artisan queue:listen --tries=1
+```bash
+composer install
+npm install
+php artisan migrate
+```
 
 ## Running Tests
 
-Run test suite:
-
-	composer run test
-
-Or:
-
-	php artisan test
-
-## Production Build of Assets
-
-To build frontend assets for production:
-
-	npm run build
-
-## Common Issues
-
-- APP_KEY missing: run php artisan key:generate
-- Storage permission issues: run php artisan storage:link
-- Config cache issues after .env changes:
-
-	  php artisan config:clear
-	  php artisan cache:clear
-
-## Quick Start (All-in-One)
-
-From a fresh clone:
-
-	composer run setup
-	composer run dev
-
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer run test
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Or directly:
 
-## Contributing
+```bash
+php artisan test
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Production Build
 
-## Code of Conduct
+Build optimized frontend assets for production:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+npm run build
+```
 
-## Security Vulnerabilities
+## Troubleshooting
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Problem                              | Solution                                            |
+|--------------------------------------|-----------------------------------------------------|
+| `APP_KEY` missing                    | `php artisan key:generate`                          |
+| Storage/symlink errors               | `php artisan storage:link`                          |
+| Config not reflecting `.env` changes | `php artisan config:clear && php artisan cache:clear` |
+| Migration errors after DB change     | Verify `.env` DB credentials, then `php artisan migrate` |
+| Node modules issues                  | Delete `node_modules` and run `npm install`         |
+| Composer lock conflict               | `composer install --no-cache`                       |
 
-## License
+## Quick Start (TL;DR)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-"# lnf"  git init git add README.md git commit -m "first commit" git branch -M main git remote add origin https://github.com/rodriguezreign/lnf.git git push -u origin main
+```bash
+git clone <repository-url> sads
+cd sads
+composer run setup        # install everything + migrate + build
+composer run dev          # start dev server at http://127.0.0.1:8000
+```
